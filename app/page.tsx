@@ -1,4 +1,5 @@
 import { CHANNELS, COUNTRIES } from "@/data/channels";
+import { MOVIES } from "@/data/movies";
 import HomePage from "@/components/HomePage";
 
 export default function Page() {
@@ -13,5 +14,12 @@ export default function Page() {
     count: CHANNELS.filter((ch) => ch.country === c.name).length,
   })).filter((c) => c.count > 0);
 
-  return <HomePage channels={CHANNELS} countries={countriesWithCount} featured={featured} />;
+  return (
+    <HomePage
+      channels={CHANNELS}
+      countries={countriesWithCount}
+      featured={featured}
+      movieCount={MOVIES.length}
+    />
+  );
 }

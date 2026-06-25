@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Player from "@/components/Player";
 import Link from "next/link";
 import ChannelCard from "@/components/ChannelCard";
+import WatchlistButton from "@/components/WatchlistButton";
 
 export function generateStaticParams() {
   return CHANNELS.map((c) => ({ id: c.id }));
@@ -86,16 +87,19 @@ export default async function WatchPage({
             </div>
           </div>
 
-          {/* Back button */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 glass text-white px-4 py-2.5 rounded-full text-sm font-semibold hover:bg-white/15 transition"
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <WatchlistButton id={channel.id} type="channel" title={channel.name} size="md" />
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 glass text-white px-4 py-2.5 rounded-full text-sm font-semibold hover:bg-white/15 transition"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Kembali
           </Link>
+          </div>
         </div>
 
         {/* Related */}

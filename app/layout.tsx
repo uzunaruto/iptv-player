@@ -8,11 +8,11 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 export const metadata: Metadata = {
   metadataBase: new URL("https://iptv-player.vercel.app"),
   title: {
-    default: "NONTON — Live TV Indonesia & Asia Tenggara",
+    default: "NONTON — Live TV, Movies & Series Gratis",
     template: "%s | NONTON",
   },
   description:
-    "Nonton 265+ channel TV Indonesia, Korea, Thailand, Japan, dan Asia Tenggara gratis. Streaming live TV tanpa buffering.",
+    "Nonton 950+ channel TV Indonesia, Korea, Thailand, Japan gratis + 40+ film & series pilihan. Streaming live TV dan VOD tanpa buffering, tanpa login.",
   applicationName: "NONTON",
   keywords: [
     "nonton tv",

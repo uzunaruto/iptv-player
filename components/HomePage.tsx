@@ -16,10 +16,12 @@ export default function HomePage({
   channels,
   countries,
   featured,
+  movieCount,
 }: {
   channels: Channel[];
   countries: Country[];
   featured: Channel[];
+  movieCount: number;
 }) {
   const [query, setQuery] = useState("");
   const [activeCountry, setActiveCountry] = useState<string>("all");
@@ -97,59 +99,86 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Sticky search + filter bar */}
+      {/* Sticky nav + search bar */}
       <div className="sticky top-0 z-40 glass border-b border-white/5">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center gap-3 flex-wrap">
-          <Link href="/" className="flex-shrink-0">
-            <span className="text-xl font-black tracking-tighter">
-              NONTON<span className="text-[#e50914]">.</span>
-            </span>
-          </Link>
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5">
+          {/* Top row: logo + tabs */}
+          <div className="flex items-center gap-4 mb-2.5">
+            <Link href="/" className="flex-shrink-0">
+              <span className="text-lg font-black tracking-tighter">
+                NONTON<span className="text-[#e50914]">.</span>
+              </span>
+            </Link>
 
-          <div className="relative flex-1 min-w-[180px] max-w-xl">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              type="search"
-              placeholder="Cari channel, negara, kategori..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full bg-white/[0.06] border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-white/30 focus:bg-white/[0.1] transition"
-            />
+            <nav className="flex items-center gap-1">
+              <Link
+                href="/"
+                className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-black"
+              >
+                📺 Live TV
+              </Link>
+              <Link
+                href="/movies/"
+                className="px-3 py-1.5 rounded-full text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition"
+              >
+                🎬 Movies ({movieCount})
+              </Link>
+              <Link
+                href="/watchlist/"
+                className="px-3 py-1.5 rounded-full text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition"
+              >
+                📋 Watchlist
+              </Link>
+            </nav>
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <button
-              onClick={() => setActiveCountry("all")}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
-                activeCountry === "all"
-                  ? "bg-white text-black"
-                  : "bg-white/[0.06] text-white/70 hover:bg-white/[0.12]"
-              }`}
-            >
-              Semua ({channels.length})
-            </button>
-            {countries.map((c) => (
+          {/* Search + filter row */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[180px] max-w-xl">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="search"
+                placeholder="Cari channel, negara, kategori..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-white/[0.06] border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-white/30 focus:bg-white/[0.1] transition"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               <button
-                key={c.code}
-                onClick={() => setActiveCountry(c.name)}
+                onClick={() => setActiveCountry("all")}
                 className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
-                  activeCountry === c.name
+                  activeCountry === "all"
                     ? "bg-white text-black"
                     : "bg-white/[0.06] text-white/70 hover:bg-white/[0.12]"
                 }`}
               >
-                {c.name} ({c.count})
+                Semua ({channels.length})
               </button>
-            ))}
+              {countries.map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => setActiveCountry(c.name)}
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
+                    activeCountry === c.name
+                      ? "bg-white text-black"
+                      : "bg-white/[0.06] text-white/70 hover:bg-white/[0.12]"
+                  }`}
+                >
+                  {c.name} ({c.count})
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -192,6 +221,32 @@ export default function HomePage({
         )}
       </main>
 
+      {/* Quick nav */}
+      <section className="border-t border-white/5 py-12">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link href="/movies/"
+              className="glass rounded-xl p-6 hover:bg-white/[0.08] transition group">
+              <div className="text-3xl mb-3">🎬</div>
+              <h3 className="font-bold text-sm mb-1">Movies & Series</h3>
+              <p className="text-xs text-white/50">{movieCount} film & series pilihan</p>
+            </Link>
+            <Link href="/watchlist/"
+              className="glass rounded-xl p-6 hover:bg-white/[0.08] transition group">
+              <div className="text-3xl mb-3">📋</div>
+              <h3 className="font-bold text-sm mb-1">Watchlist</h3>
+              <p className="text-xs text-white/50">Film, series & channel favorit lo</p>
+            </Link>
+            <a href="#channels"
+              className="glass rounded-xl p-6 hover:bg-white/[0.08] transition group">
+              <div className="text-3xl mb-3">📺</div>
+              <h3 className="font-bold text-sm mb-1">Live TV</h3>
+              <p className="text-xs text-white/50">{totalChannels} channel dari 7 negara</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <footer className="border-t border-white/5 py-8 text-center text-xs text-white/40">
         <p>
           NONTON · Powered by{" "}
@@ -203,7 +258,7 @@ export default function HomePage({
           >
             iptv-org/iptv
           </a>{" "}
-          · {totalChannels} channel
+          · {totalChannels} channel · {movieCount} film & series
         </p>
       </footer>
     </div>

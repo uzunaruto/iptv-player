@@ -13,6 +13,21 @@ function isDashUrl(url: string) {
   return /\.mpd(\?|$)/i.test(url);
 }
 
+// Wrap a stream URL through our serverless CORS proxy.
+// Uses base64url encoding so special chars (?, =, &) in upstream URLs don't
+// conflict with the proxy query string after player template substitution.
+function proxiedUrl(upstreamUrl: string): string {
+  if (typeof window === "undefined") {
+    // SSR fallback
+    return `/api/stream?u=${encodeURIComponent(upstreamUrl)}`;
+  }
+  const b64 = btoa(unescape(encodeURIComponent(upstreamUrl)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return `/api/stream?u=${b64}`;
+}
+
 export default function Player({
   src,
   poster,
@@ -80,8 +95,12 @@ export default function Player({
             enableWorker: true,
             lowLatencyMode: false,
             workerPath: "/vendor/hls.worker.js",
+            xhrSetup: (xhr: XMLHttpRequest) => {
+              // All manifest + segment fetches go through proxy → CORS safe
+              xhr.withCredentials = false;
+            },
           });
-          hls.loadSource(src);
+          hls.loadSource(proxiedUrl(src));
           hls.attachMedia(video);
           hls.on(window.Hls.Events.MANIFEST_PARSED, () => setLoading(false));
           hls.on(window.Hls.Events.ERROR, (_e: any, data: any) => {
@@ -104,7 +123,7 @@ export default function Player({
         }
       } else {
         // Native HLS (Safari)
-        video.src = src;
+        video.src = proxiedUrl(src);
         video.addEventListener("loadedmetadata", () => setLoading(false), { once: true });
         video.addEventListener("error", () => onError("Stream format tidak didukung."), { once: true });
       }
@@ -123,7 +142,7 @@ export default function Player({
       if (window.dashjs) {
         try {
           dash = window.dashjs.MediaPlayer().create();
-          dash.initialize(video, src, true);
+          dash.initialize(video, proxiedUrl(src), true);
           dash.on(window.dashjs.MediaPlayer.events["STREAM_INITIALIZED"], () => setLoading(false));
           dash.on(window.dashjs.MediaPlayer.events["ERROR"], (e: any) => {
             if (e?.error?.code) {
@@ -138,7 +157,7 @@ export default function Player({
         }
       } else {
         // Try native video (will probably fail for DASH in Chrome, but try)
-        video.src = src;
+        video.src = proxiedUrl(src);
         video.addEventListener("loadedmetadata", () => setLoading(false), { once: true });
         video.addEventListener("error", () => onError("DASH tidak didukung browser ini."), { once: true });
       }
