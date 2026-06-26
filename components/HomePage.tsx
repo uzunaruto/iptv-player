@@ -12,6 +12,24 @@ interface Country {
   flag?: string;
 }
 
+const indonesian_categories = [
+  { id: "all", emoji: "🇮🇩", label: "Semua" },
+  { id: "Berita", emoji: "📰", label: "Berita" },
+  { id: "Hiburan", emoji: "🎭", label: "Hiburan" },
+  { id: "Olahraga", emoji: "⚽", label: "Olahraga" },
+  { id: "Anak", emoji: "👶", label: "Anak" },
+  { id: "Film", emoji: "🎬", label: "Film" },
+  { id: "Agama", emoji: "🕌", label: "Agama" },
+  { id: "Lokal", emoji: "🏘️", label: "Lokal" },
+  { id: "Edukasi", emoji: "📚", label: "Edukasi" },
+  { id: "Musik", emoji: "🎵", label: "Musik" },
+  { id: "Kuliner", emoji: "🍜", label: "Kuliner" },
+  { id: "Lifestyle", emoji: "✨", label: "Lifestyle" },
+  { id: "K-Drama", emoji: "🇰🇷", label: "K-Drama" },
+  { id: "Umum", emoji: "📺", label: "Umum" },
+  { id: "Internasional", emoji: "🌍", label: "Internasional" },
+];
+
 export default function HomePage({
   channels,
   countries,
@@ -25,11 +43,15 @@ export default function HomePage({
 }) {
   const [query, setQuery] = useState("");
   const [activeCountry, setActiveCountry] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   const filtered = useMemo(() => {
     let list = channels;
     if (activeCountry !== "all") {
       list = list.filter((c) => c.country === activeCountry);
+    }
+    if (activeCategory !== "all") {
+      list = list.filter((c) => c.category === activeCategory);
     }
     if (query.trim()) {
       const q = query.toLowerCase().trim();
@@ -37,11 +59,12 @@ export default function HomePage({
         (c) =>
           c.name.toLowerCase().includes(q) ||
           c.country.toLowerCase().includes(q) ||
-          (c.group?.toLowerCase().includes(q) ?? false)
+          (c.group?.toLowerCase().includes(q) ?? false) ||
+          (c.category?.toLowerCase().includes(q) ?? false)
       );
     }
     return list;
-  }, [channels, query, activeCountry]);
+  }, [channels, query, activeCountry, activeCategory]);
 
   const heroChannel = featured[0] ?? channels[0];
   const totalChannels = channels.length;
@@ -168,7 +191,12 @@ export default function HomePage({
               {countries.map((c) => (
                 <button
                   key={c.code}
-                  onClick={() => setActiveCountry(c.name)}
+                  onClick={() => {
+                  setActiveCountry(c.name);
+                  if (c.name !== "Indonesia") {
+                    setActiveCategory("all");
+                  }
+                }}
                   className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
                     activeCountry === c.name
                       ? "bg-white text-black"
@@ -180,6 +208,26 @@ export default function HomePage({
               ))}
             </div>
           </div>
+
+          {/* Category filter - only show when Indonesia is selected */}
+          {activeCountry === "Indonesia" && (
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar mt-2.5 pt-2.5 border-t border-white/10">
+              <span className="text-[10px] text-white/40 uppercase tracking-wider mr-1">Kategori:</span>
+              {indonesian_categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                    activeCategory === cat.id
+                      ? "bg-[#e50914] text-white"
+                      : "bg-white/[0.06] text-white/70 hover:bg-white/[0.12]"
+                  }`}
+                >
+                  {cat.emoji} {cat.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -187,7 +235,7 @@ export default function HomePage({
       <main id="channels" className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-baseline justify-between mb-5">
           <h2 className="text-lg sm:text-xl font-bold">
-            {activeCountry === "all" ? "Semua Channel" : activeCountry}
+            {activeCountry === "all" ? "Semua Channel" : activeCountry}{activeCategory !== "all" ? ` > ${activeCategory}` : ""}
             <span className="text-white/40 font-normal ml-2 text-sm">
               ({filtered.length})
             </span>
@@ -206,6 +254,7 @@ export default function HomePage({
               onClick={() => {
                 setQuery("");
                 setActiveCountry("all");
+                setActiveCategory("all");
               }}
               className="mt-4 text-xs text-[#e50914] hover:underline"
             >

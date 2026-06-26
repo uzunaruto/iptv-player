@@ -13,6 +13,10 @@ function isDashUrl(url: string) {
   return /\.mpd(\?|$)/i.test(url);
 }
 
+function isYouTubeUrl(url: string) {
+  return /youtube\.com\/(embed|watch)/i.test(url) || /youtu\.be/i.test(url);
+}
+
 // Wrap a stream URL through our serverless CORS proxy.
 // Uses base64url encoding so special chars (?, =, &) in upstream URLs don't
 // conflict with the proxy query string after player template substitution.
@@ -32,17 +36,23 @@ export default function Player({
   src,
   poster,
   name,
+  type,
 }: {
   src: string;
   poster?: string;
   name: string;
+  type?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
 
+  const useYouTube = type === "youtube" || isYouTubeUrl(src);
+
   useEffect(() => {
+    if (useYouTube) return; // YouTube uses iframe, no video setup needed
+
     const video = videoRef.current;
     if (!video || !src) return;
 
@@ -59,13 +69,11 @@ export default function Player({
     };
 
     const isDash = isDashUrl(src);
-    const playerTag = isDash ? "DASH" : "HLS";
 
     // Load script helper
     const loadScript = (path: string, attrName: string): Promise<void> => {
       return new Promise((resolve, reject) => {
         if (document.querySelector(`script[data-${attrName}]`)) {
-          // Already loaded
           resolve();
           return;
         }
@@ -96,7 +104,6 @@ export default function Player({
             lowLatencyMode: false,
             workerPath: "/vendor/hls.worker.js",
             xhrSetup: (xhr: XMLHttpRequest) => {
-              // All manifest + segment fetches go through proxy → CORS safe
               xhr.withCredentials = false;
             },
           });
@@ -156,7 +163,6 @@ export default function Player({
           onError("Browser tidak support DASH player.");
         }
       } else {
-        // Try native video (will probably fail for DASH in Chrome, but try)
         video.src = proxiedUrl(src);
         video.addEventListener("loadedmetadata", () => setLoading(false), { once: true });
         video.addEventListener("error", () => onError("DASH tidak didukung browser ini."), { once: true });
@@ -177,7 +183,30 @@ export default function Player({
       if (hls) { try { hls.destroy(); } catch {} }
       if (dash) { try { dash.reset(); } catch {} }
     };
-  }, [src]);
+  }, [src, useYouTube]);
+
+  // YouTube iframe mode
+  if (useYouTube) {
+    return (
+      <div className="relative w-full h-full bg-black">
+        <iframe
+          src={src}
+          className="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          onLoad={() => setLoading(false)}
+        />
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/30">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 border-2 border-white/20 border-t-[#e50914] rounded-full animate-spin" />
+              <p className="text-xs text-white/60">Loading {name}...</p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full bg-black group">

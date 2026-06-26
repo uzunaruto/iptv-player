@@ -50,7 +50,7 @@ export default async function WatchPage({
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Player */}
         <div className="relative aspect-video bg-[#0a0a0a] rounded-xl overflow-hidden ring-1 ring-white/10 shadow-[0_24px_60px_rgba(0,0,0,.5)]">
-          <Player src={channel.url} poster={channel.logo} name={channel.name} />
+          <Player src={channel.url} poster={channel.logo} name={channel.name} type={channel.type} />
         </div>
 
         {/* Channel info */}
