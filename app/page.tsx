@@ -11,7 +11,7 @@ export default function Page() {
   // Compute count per country
   const countriesWithCount = COUNTRIES.map((c) => ({
     ...c,
-    count: CHANNELS.filter((ch) => ch.country === c.name).length,
+    count: CHANNELS.filter((ch) => ch.country === c.code).length,
   })).filter((c) => c.count > 0);
 
   return (
