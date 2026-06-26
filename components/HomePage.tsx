@@ -192,13 +192,13 @@ export default function HomePage({
                 <button
                   key={c.code}
                   onClick={() => {
-                  setActiveCountry(c.name);
-                  if (c.name !== "Indonesia") {
+                  setActiveCountry(c.code);
+                  if (c.code !== "ID") {
                     setActiveCategory("all");
                   }
                 }}
                   className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition ${
-                    activeCountry === c.name
+                    activeCountry === c.code
                       ? "bg-white text-black"
                       : "bg-white/[0.06] text-white/70 hover:bg-white/[0.12]"
                   }`}
@@ -210,7 +210,7 @@ export default function HomePage({
           </div>
 
           {/* Category filter - only show when Indonesia is selected */}
-          {activeCountry === "Indonesia" && (
+          {activeCountry === "ID" && (
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar mt-2.5 pt-2.5 border-t border-white/10">
               <span className="text-[10px] text-white/40 uppercase tracking-wider mr-1">Kategori:</span>
               {indonesian_categories.map((cat) => (
@@ -235,7 +235,7 @@ export default function HomePage({
       <main id="channels" className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-baseline justify-between mb-5">
           <h2 className="text-lg sm:text-xl font-bold">
-            {activeCountry === "all" ? "Semua Channel" : activeCountry}{activeCategory !== "all" ? ` > ${activeCategory}` : ""}
+            {activeCountry === "all" ? "Semua Channel" : countries.find(c => c.code === activeCountry)?.name ?? activeCountry}{activeCategory !== "all" ? ` > ${activeCategory}` : ""}
             <span className="text-white/40 font-normal ml-2 text-sm">
               ({filtered.length})
             </span>
